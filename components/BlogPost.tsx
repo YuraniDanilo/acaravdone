@@ -1,8 +1,7 @@
 "use client";
-
 import React, { useMemo, useEffect, useContext } from "react";
-import Head from "next/head";
-import { useRouter, useParams } from "next/navigation";
+import Head from 'next/head';
+import { useRouter } from "next/navigation";
 import {
   FaWhatsapp,
   FaFacebook,
@@ -14,10 +13,13 @@ import { DataContext } from "../context/DataProvider";
 import Image from "next/image";
 import logo from "@/public/logo.png";
 
-export default function BlogPost() {
+interface BlogPostProps {
+  id: string;
+  type: "study" | "prophecy";
+}
+
+export default function BlogPost({ id, type }: BlogPostProps) {
   const router = useRouter();
-  const params = useParams();
-  const { id } = params || {};
   const { studies, prophecies, setSelectedStudy } = useContext(DataContext);
 
   const allPosts = [...studies, ...Object.values(prophecies).flat()];
