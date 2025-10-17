@@ -1,9 +1,27 @@
-// context/DataProvider.jsx
 "use client";
-import React, { useState, useEffect, createContext } from "react";
+import React, { useState, useEffect, createContext, ReactNode } from "react";
 import Papa from "papaparse";
 
-export const DataContext = createContext();
+interface Post {
+  id: string;
+  title: string;
+  description: string;
+  image: string;
+  content?: string;
+  year?: string;
+  file?: string;
+  type: "study" | "prophecy";
+}
+
+interface DataContextType {
+  studies: Post[];
+  prophecies: Record<string, Post[]>;
+  downloads: Post[];
+  selectedStudy: Post | null;
+  setSelectedStudy: (study: Post | null) => void;
+}
+
+export const DataContext = createContext<DataContextType | undefined>(undefined);
 
 const SHEET_ESTUDOS =
   "https://docs.google.com/spreadsheets/d/e/2PACX-1vRg3zmeoUqUOh08hGDourCsZsHh0VD_rdGh_Kwy3IwdOm_5tMwGwM_V-SrAsyUgiwQaxvaqRb1GqKgB/pub?gid=0&single=true&output=csv";
@@ -12,11 +30,11 @@ const SHEET_PROFECIAS =
 const SHEET_DOWNLOADS =
   "https://docs.google.com/spreadsheets/d/e/2PACX-1vRg3zmeoUqUOh08hGDourCsZsHh0VD_rdGh_Kwy3IwdOm_5tMwGwM_V-SrAsyUgiwQaxvaqRb1GqKgB/pub?gid=715916802&single=true&output=csv";
 
-export default function DataProvider({ children }) {
-  const [studies, setStudies] = useState([]);
-  const [prophecies, setProphecies] = useState({});
-  const [downloads, setDownloads] = useState([]);
-  const [selectedStudy, setSelectedStudy] = useState(null);
+export default function DataProvider({ children }: { children: ReactNode }) {
+  const [studies, setStudies] = useState<Post[]>([]);
+  const [prophecies, setProphecies] = useState<Record<string, Post[]>>({});
+  const [downloads, setDownloads] = useState<Post[]>([]);
+  const [selectedStudy, setSelectedStudy] = useState<Post | null>(null);
 
   // Estudos
   useEffect(() => {
@@ -24,8 +42,8 @@ export default function DataProvider({ children }) {
       download: true,
       header: true,
       skipEmptyLines: true,
-      complete: (results) => {
-        const data = results.data.map((r, i) => ({
+      complete: (results: any) => {
+        const data: Post[] = results.data.map((r: any, i: number) => ({
           id: r.Id || i.toString(),
           title: r.Title || "Sem título",
           description: r.Description || "",
@@ -36,7 +54,7 @@ export default function DataProvider({ children }) {
         }));
         setStudies(data);
       },
-      error: (error) => console.error("Error fetching studies:", error),
+      error: (error: any) => console.error("Error fetching studies:", error),
     });
   }, []);
 
@@ -46,8 +64,8 @@ export default function DataProvider({ children }) {
       download: true,
       header: true,
       skipEmptyLines: true,
-      complete: (results) => {
-        const data = results.data.map((r, i) => ({
+      complete: (results: any) => {
+        const data: Post[] = results.data.map((r: any, i: number) => ({
           id: r.Id || i.toString(),
           title: r.Title || "Profecia sem título",
           description: r.Description || "",
@@ -57,7 +75,7 @@ export default function DataProvider({ children }) {
           type: "prophecy",
         }));
 
-        const grouped = data.reduce((acc, item) => {
+        const grouped = data.reduce((acc: Record<string, Post[]>, item) => {
           const year = item.year || "Outros";
           if (!acc[year]) acc[year] = [];
           acc[year].push(item);
@@ -65,7 +83,7 @@ export default function DataProvider({ children }) {
         }, {});
         setProphecies(grouped);
       },
-      error: (error) => console.error("Error fetching prophecies:", error),
+      error: (error: any) => console.error("Error fetching prophecies:", error),
     });
   }, []);
 
@@ -75,8 +93,8 @@ export default function DataProvider({ children }) {
       download: true,
       header: true,
       skipEmptyLines: true,
-      complete: (results) => {
-        const data = results.data.map((r, i) => {
+      complete: (results: any) => {
+        const data: Post[] = results.data.map((r: any, i: number) => {
           let fileUrl = r.fileUrl?.trim() || "";
           if (fileUrl.includes("drive.google.com")) {
             const idMatch = fileUrl.match(/[-\w]{25,}/);
@@ -92,11 +110,12 @@ export default function DataProvider({ children }) {
               r.Image?.trim() ||
               "https://via.placeholder.com/400x250?text=Livro",
             file: fileUrl || "#",
+            type: "study",
           };
         });
         setDownloads(data);
       },
-      error: (error) => console.error("Error fetching downloads:", error),
+      error: (error: any) => console.error("Error fetching downloads:", error),
     });
   }, []);
 

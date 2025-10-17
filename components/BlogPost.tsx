@@ -1,4 +1,6 @@
 "use client";
+
+
 import React, { useMemo, useEffect, useContext } from "react";
 import Head from 'next/head';
 import { useRouter } from "next/navigation";
@@ -15,12 +17,17 @@ import logo from "@/public/logo.png";
 
 interface BlogPostProps {
   id: string;
-  type: "study" | "prophecy";
+  type: string;
 }
 
 export default function BlogPost({ id, type }: BlogPostProps) {
   const router = useRouter();
-  const { studies, prophecies, setSelectedStudy } = useContext(DataContext);
+  const data = useContext(DataContext);
+
+  if (!data)
+    throw new Error("DataContext não encontrado. Verifique o DataProvider.");
+
+  const { studies, prophecies, setSelectedStudy } = data;
 
   const allPosts = [...studies, ...Object.values(prophecies).flat()];
   const study = allPosts.find((p) => String(p.id) === String(id));
