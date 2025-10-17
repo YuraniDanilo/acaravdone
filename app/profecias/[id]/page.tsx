@@ -1,10 +1,10 @@
-// app/profecias/[id]/page.jsx
 "use client";
-import BlogPost from "../../../components/BlogPost";
 import { useParams } from "next/navigation";
+import BlogPost from "@/components/BlogPost";
 
-export default function ProfeciaDetalhe() {
+export default function ProfeciaPage() {
   const params = useParams();
-  const { id } = params || {};
+  const id = Array.isArray(params?.id) ? params.id[0] : params?.id ?? "";
+
   return <BlogPost type="prophecy" id={id} />;
 }
